@@ -13,15 +13,9 @@ let generateGrid = () => {
   }
   createStartValues();
   drawGrid();
-
   redrawBlocks();
-
   document.addEventListener('keydown', function ( event ) {
-    if (isGameOver()) {
-      console.log("GameOver");
-    } else {
       move(event);
-    }
   });
 };
 
@@ -42,6 +36,17 @@ let drawGrid = () => {
   }
 };
 
+let isFull = () => {
+  for(let i = 0; i < 4; i++) {
+    for(let j = 0; j < 4; j++) {
+      if(blocks[i][j] === 0) {
+        return false;
+      }
+    }
+  }
+  return true;
+};
+
 let getRandomBlocks = () => {
   return Math.floor((Math.random() * 4));
 };
@@ -53,7 +58,6 @@ let drawRectangle = ( y, x ) => {
   div.style.backgroundColor = 'white';
   if (blocks[ y ][ x ] !== 0) {
     div.innerHTML = blocks[ y ][ x ];
-    console.log(generateColor(blocks[ y ][ x ]), blocks[ y ][ x ]);
     div.style.backgroundColor = generateColor(blocks[ y ][ x ]);
     div.style.color = 'white';
   }
@@ -87,25 +91,23 @@ let move = ( e ) => {
   switch (e.key) {
     case 'ArrowDown':
       shift(blocks[ 0 ].length - 1, -1, -1, 0);
-      spawn();
-      redrawBlocks();
       break;
     case 'ArrowUp':
       shift(0, blocks[ 0 ].length, 1, 0);
-      spawn();
-      redrawBlocks();
       break;
     case 'ArrowLeft':
       shift(0, blocks[ 0 ].length, 1, 1);
-      spawn();
-      redrawBlocks();
       break;
     case 'ArrowRight':
       shift(blocks[ 0 ].length - 1, -1, -1, 1);
-      spawn();
-      redrawBlocks();
+      break;
   }
-
+  redrawBlocks();
+  if(!isFull()) {
+    spawn();
+  } else {
+    isGameOver();
+  }
 };
 
 let shift = ( start, end, inc, direction ) => {
@@ -140,11 +142,19 @@ let shift = ( start, end, inc, direction ) => {
   }
 };
 
-let merge = ( ixf, iyf, ixs, iys ) => {
-  if (ixs >= 0 && ixs < blocks.length && iys >= 0 && iys < blocks[ 0 ].length) {
-    if (blocks[ ixf ][ iyf ] === blocks[ ixs ][ iys ]) {
-      blocks[ ixs ][ iys ] = blocks[ ixs ][ iys ] + blocks[ ixs ][ iys ];
-      blocks[ ixf ][ iyf ] = 0;
+let merge = (  iif,  ijf,  iis,  ijs,  inc) => {
+  if (iis >= 0 && iis < blocks.length && ijs >= 0 && ijs < blocks[0].length) {
+    if (blocks[iif][ijf] === blocks[iis][ijs]) {
+      blocks[iis][ijs] *= 2;
+      blocks[iif][ijf] = 0;
+    } else if (blocks[iis][ijs] === 0) {
+      blocks[iis][ijs] = blocks[iif][ijf];
+      blocks[iif][ijf] = 0;
+      if (iif === iis) {
+        merge(iis, ijs, iis, ijs-inc, inc);
+      } else if (ijf === ijs) {
+        merge(iis, ijs, iis-inc, ijs, inc);
+      }
     }
   }
 };
@@ -167,22 +177,25 @@ let generateColor = ( value ) => {
 let isGameOver = () => {
   for (let x = 0; x < blocks[ 0 ].length; x++) {
     for (let y = 0; y < blocks[ x ].length; y++) {
-      if (blocks[ x ][ y ] === 0) {
+      if (blocks[ x ][ y ] !== 0) {
         let v = blocks[ x ][ y ];
-        console.log(v);
         if (x > 0 && blocks[ x - 1 ][ y ] !== 0 && v === blocks[ x - 1 ][ y ]) {
+          console.log('Over 1');
           return true;
         }
 
         if (y > 0 && blocks[ x ][ y - 1 ] !== 0 && v === blocks[ x ][ y - 1 ]) {
+          console.log('Over 2');
           return true;
         }
 
         if (x < 4 - 1 && blocks[ x + 1 ][ y ] !== 0 && v === blocks[ x + 1 ][ y ]) {
+          console.log('Over 3');
           return true;
         }
 
         if (y < 4 - 1 && blocks[ x ][ y + 1 ] !== 0 && v === blocks[ x ][ y + 1 ]) {
+          console.log('Over 4');
           return true;
         }
       }
