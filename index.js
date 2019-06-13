@@ -15,7 +15,7 @@ let generateGrid = () => {
   drawGrid();
   redrawBlocks();
   document.addEventListener('keydown', function ( event ) {
-      move(event);
+    move(event);
   });
 };
 
@@ -37,9 +37,9 @@ let drawGrid = () => {
 };
 
 let isFull = () => {
-  for(let i = 0; i < 4; i++) {
-    for(let j = 0; j < 4; j++) {
-      if(blocks[i][j] === 0) {
+  for (let i = 0; i < 4; i++) {
+    for (let j = 0; j < 4; j++) {
+      if (blocks[ i ][ j ] === 0) {
         return false;
       }
     }
@@ -101,14 +101,18 @@ let move = ( e ) => {
     case 'ArrowRight':
       shift(blocks[ 0 ].length - 1, -1, -1, 1);
       break;
+    default:
+      return;
   }
   redrawBlocks();
-  if(!isFull()) {
+  if (!isFull()) {
     spawn();
   } else {
     console.log(isBoardPlayable());
-    if(isBoardPlayable()) {
-      gameOverAnimation();
+    if (isBoardPlayable()) {
+      if(!document.querySelector('.overlay')) {
+        gameOverAnimation();
+      }
     }
   }
 };
@@ -145,18 +149,18 @@ let shift = ( start, end, inc, direction ) => {
   }
 };
 
-let merge = (  iif,  ijf,  iis,  ijs,  inc) => {
-  if (iis >= 0 && iis < blocks.length && ijs >= 0 && ijs < blocks[0].length) {
-    if (blocks[iif][ijf] === blocks[iis][ijs]) {
-      blocks[iis][ijs] *= 2;
-      blocks[iif][ijf] = 0;
-    } else if (blocks[iis][ijs] === 0) {
-      blocks[iis][ijs] = blocks[iif][ijf];
-      blocks[iif][ijf] = 0;
+let merge = ( iif, ijf, iis, ijs, inc ) => {
+  if (iis >= 0 && iis < blocks.length && ijs >= 0 && ijs < blocks[ 0 ].length) {
+    if (blocks[ iif ][ ijf ] === blocks[ iis ][ ijs ]) {
+      blocks[ iis ][ ijs ] *= 2;
+      blocks[ iif ][ ijf ] = 0;
+    } else if (blocks[ iis ][ ijs ] === 0) {
+      blocks[ iis ][ ijs ] = blocks[ iif ][ ijf ];
+      blocks[ iif ][ ijf ] = 0;
       if (iif === iis) {
-        merge(iis, ijs, iis, ijs-inc, inc);
+        merge(iis, ijs, iis, ijs - inc, inc);
       } else if (ijf === ijs) {
-        merge(iis, ijs, iis-inc, ijs, inc);
+        merge(iis, ijs, iis - inc, ijs, inc);
       }
     }
   }
@@ -206,14 +210,15 @@ let convertToHex = ( colorVal ) => {
 };
 
 let gameOverAnimation = () => {
-  for(let i = 0; i < blocks[0].length; i++) {
-    for(let j = 0; j < blocks[0].length; j++) {
-      setTimeout(() => {
-        let name = '.e' + j + '' + i;
-        let div = document.querySelector(name);
-        div.innerHTML = '';
-        div.style.backgroundColor = 'black';
-      },3000)
-    }
-  }
+  let root = document.querySelector('.grid');
+  let overlay = document.createElement('div');
+  let overlayLabel = document.createElement('label');
+  overlayLabel.innerHTML = 'Game Over';
+  root.classList.add('blur');
+  overlay.className = 'overlay';
+
+  overlay.appendChild(overlayLabel);
+
+  document.body.appendChild(overlay);
+
 };
