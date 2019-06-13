@@ -106,7 +106,10 @@ let move = ( e ) => {
   if(!isFull()) {
     spawn();
   } else {
-    isGameOver();
+    console.log(isBoardPlayable());
+    if(isBoardPlayable()) {
+      gameOverAnimation();
+    }
   }
 };
 
@@ -171,40 +174,46 @@ let spawn = () => {
 
 let generateColor = ( value ) => {
   let b = value % 255;
-  return "#" + convertToHex(450 / (value % 255)) + convertToHex(b % 255) + convertToHex(b * 10 % 255);
+  return "#" + convertToHex(255 / b) + convertToHex(b % 255) + convertToHex(b * 10 % 255);
 };
 
-let isGameOver = () => {
+let isBoardPlayable = () => {
   for (let x = 0; x < blocks[ 0 ].length; x++) {
     for (let y = 0; y < blocks[ x ].length; y++) {
       if (blocks[ x ][ y ] !== 0) {
         let v = blocks[ x ][ y ];
         if (x > 0 && blocks[ x - 1 ][ y ] !== 0 && v === blocks[ x - 1 ][ y ]) {
-          console.log('Over 1');
-          return true;
+          return false;
         }
-
         if (y > 0 && blocks[ x ][ y - 1 ] !== 0 && v === blocks[ x ][ y - 1 ]) {
-          console.log('Over 2');
-          return true;
+          return false;
         }
-
         if (x < 4 - 1 && blocks[ x + 1 ][ y ] !== 0 && v === blocks[ x + 1 ][ y ]) {
-          console.log('Over 3');
-          return true;
+          return false;
         }
-
         if (y < 4 - 1 && blocks[ x ][ y + 1 ] !== 0 && v === blocks[ x ][ y + 1 ]) {
-          console.log('Over 4');
-          return true;
+          return false;
         }
       }
     }
   }
-  return false;
+  return true;
 };
 
 let convertToHex = ( colorVal ) => {
   let hex = parseInt(colorVal).toString(16);
   return hex.length === 1 ? '0' + hex : hex;
+};
+
+let gameOverAnimation = () => {
+  for(let i = 0; i < blocks[0].length; i++) {
+    for(let j = 0; j < blocks[0].length; j++) {
+      setTimeout(() => {
+        let name = '.e' + j + '' + i;
+        let div = document.querySelector(name);
+        div.innerHTML = '';
+        div.style.backgroundColor = 'black';
+      },3000)
+    }
+  }
 };
